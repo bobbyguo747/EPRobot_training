@@ -27,7 +27,7 @@ class MoveBaseSquare():
         # First define the corner orientations as Euler angles
         # 定义四个顶角处机器人的方向角度（Euler angles:http://zh.wikipedia.org/wiki/%E6%AC%A7%E6%8B%89%E8%A7%92)
         #euler_angles = (0,pi/2, pi/2,-pi/2, -pi/2, pi/2,-pi/2,0,pi/4)
-        euler_angles = (1.882,1.232, 1.645,-1.357, -pi/2, -0.684,-1.238,0,-pi,0)
+        euler_angles = (pi/2,1.232, 1.645,-1.357, -pi/2, -0.684,-1.238,0,-pi,0)
         # Then convert the angles to quaternions
         # 将上面的Euler angles转换成Quaternion的格式
         for angle in euler_angles:
