@@ -15,11 +15,11 @@ TebLocalPlannerROS:
 
   # ================= 机器人速度与加速度限制 =================
   max_vel_x: 1.00  # 最大前进速度；本版先保守，让车先稳定走起来，稳定后可加到0.60
-  max_vel_x_backwards: 0.15  # 最大倒车速度，近似禁止长距离倒车，但保留极小倒车能力避免优化器报错
+  max_vel_x_backwards: 0.25  # 最大倒车速度，近似禁止长距离倒车，但保留极小倒车能力避免优化器报错
   max_vel_y: 0.0  # 阿克曼车不能横移，必须为0
-  max_vel_theta: 0.45  # 限制转向对应的角速度，减少前轮左右反复打死
-  acc_lim_x: 0.45  # 降低前后加速度，减少后轮前后小幅抽动
-  acc_lim_theta: 0.35  # 降低角加速度，减少前轮快速左右摆动
+  max_vel_theta: 0.90  # 限制转向对应的角速度，减少前轮左右反复打死
+  acc_lim_x: 0.60  # 降低前后加速度，减少后轮前后小幅抽动
+  acc_lim_theta: 0.50  # 降低角加速度，减少前轮快速左右摆动
 
   # ================= 阿克曼底盘运动学参数 =================
   min_turning_radius: 0.47  # 恢复接近原始值；过大反而容易迫使TEB用倒车/掉头完成转弯
@@ -63,7 +63,7 @@ TebLocalPlannerROS:
   weight_acc_lim_x: 1.0  # 超过线加速度的惩罚
   weight_acc_lim_theta: 1.0  # 超过角加速度的惩罚
   weight_kinematics_nh: 1000.0  # 非完整约束权重，阿克曼车不能横移，保持较大
-  weight_kinematics_forward_drive: 10000.0  # 极强前进优先，重点压制长距离倒车
+  weight_kinematics_forward_drive: 15000.0  # 极强前进优先，重点压制长距离倒车
   weight_kinematics_turning_radius: 8.0  # 降低转弯半径惩罚，避免因转不过而选择倒车掉头
   weight_optimaltime: 0.8  # 时间最优权重，不是主因但不宜太高
   weight_obstacle: 45.0  # 障碍物权重降到中等，避免在窄道中被障碍代价压得不敢前进

@@ -1,5 +1,5 @@
 # ================= move_base主控制参数 =================
-controller_frequency: 8.0  # 控制频率；10Hz有时会让局部轨迹频繁更新，本版降到8Hz更稳
+controller_frequency: 10.0  # 控制频率；10Hz有时会让局部轨迹频繁更新，本版降到8Hz更稳
 controller_patience: 8.0   # 局部规划失败等待时间，避免卡太久
 
 planner_frequency: 0.5     # 全局路径重规划频率降到0.5Hz，避免绿线频繁变化引起红线来回跳
