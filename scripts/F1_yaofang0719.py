@@ -27,7 +27,7 @@ class MoveBaseSquare():
         # First define the corner orientations as Euler angles
         # 定义四个顶角处机器人的方向角度（Euler angles:http://zh.wikipedia.org/wiki/%E6%AC%A7%E6%8B%89%E8%A7%92)
         #euler_angles = (0,pi/2, pi/2,-pi/2, -pi/2, pi/2,-pi/2,0,pi/4)
-        euler_angles = (pi/2,1.232, 1.645,-1.357, -pi/2, -0.684,-1.238,0,-pi,0)
+        euler_angles = (-pi,-pi, -pi,-1.357, -pi/2, -0.684,-1.238,0,-pi,0)
         # Then convert the angles to quaternions
         # 将上面的Euler angles转换成Quaternion的格式
         for angle in euler_angles:
@@ -41,9 +41,9 @@ class MoveBaseSquare():
         # Create a list to hold the waypoint poses
         # 创建一个列表存储导航点的位置
         waypoints = list()
-        waypoints.append(Pose(Point(1.361, 1.995, 0), quaternions[0]))      # //C
-        waypoints.append(Pose(Point(0.649, 2.553, 0), quaternions[1]))      #//A 0.675,2.393   0.65
-        waypoints.append(Pose(Point(1.300, 3.028, 0), quaternions[2]))      # //B x 减小//1.35,2.899 B小一点1.40
+        waypoints.append(Pose(Point(1.484, 2.160, 0), quaternions[0]))      # //C
+        waypoints.append(Pose(Point(0.703, 2.620, 0), quaternions[1]))      #//A 0.675,2.393   0.65
+        waypoints.append(Pose(Point(1.484, 3.171, 0), quaternions[2]))      # //B x 减小//1.35,2.899 B小一点1.40
         waypoints.append(Pose(Point(-1.075, 0.898, 0), quaternions[3]))     # //4(-0.830, 0.969, 0)
         waypoints.append(Pose(Point(-1.781, 1.296, 0), quaternions[4]))    # //3 （-1.650, 1.232, 0)
         waypoints.append(Pose(Point(-1.140, 1.715, 0), quaternions[5]))    # //2
