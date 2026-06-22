@@ -15,7 +15,6 @@ from std_srvs.srv import Empty
 import os
 import random
 class MoveBaseSquare():
-    # 改动说明：本版仅调整等待/识别时间，不改导航点坐标；撞墙和速度主要由TEB与costmap参数解决。
 
     def __init__(self):
         rospy.init_node('nav_pharmacy', anonymous=False)
@@ -27,7 +26,7 @@ class MoveBaseSquare():
         # First define the corner orientations as Euler angles
         # 定义四个顶角处机器人的方向角度（Euler angles:http://zh.wikipedia.org/wiki/%E6%AC%A7%E6%8B%89%E8%A7%92)
         #euler_angles = (0,pi/2, pi/2,-pi/2, -pi/2, pi/2,-pi/2,0,pi/4)
-        euler_angles = (pi/2,pi, pi/2,-1.357, -pi/2, -0.684+pi/2,-1.238,0,-pi,0)
+        euler_angles = (pi/2,pi/2, pi/2,-pi/2, -pi/2, -pi/2,-pi/2,0,-pi,0)
         # Then convert the angles to quaternions
         # 将上面的Euler angles转换成Quaternion的格式
         for angle in euler_angles:
@@ -41,13 +40,13 @@ class MoveBaseSquare():
         # Create a list to hold the waypoint poses
         # 创建一个列表存储导航点的位置
         waypoints = list()
-        waypoints.append(Pose(Point(1.284, 2.160, 0), quaternions[0]))      #//C 1.484
-        waypoints.append(Pose(Point(0.603, 2.620, 0), quaternions[1]))      #//A 0.675,2.393   0.65  0.703
-        waypoints.append(Pose(Point(1.284, 3.000, 0), quaternions[2]))      # //B x 减小//1.35,2.899 B小一点1.40，3.171
-        waypoints.append(Pose(Point(-1.075, 0.898, 0), quaternions[3]))     # //4(-0.830, 0.969, 0)
-        waypoints.append(Pose(Point(-1.731, 1.296, 0), quaternions[4]))    # //3  -1.781 （-1.650, 1.232, 0)
-        waypoints.append(Pose(Point(-1.080, 1.715, 0), quaternions[5]))    # //2  -1.140
-        waypoints.append(Pose(Point(-1.734, 2.325, 0), quaternions[6]))    # //1  -1.834
+        waypoints.append(Pose(Point(1.395, 2.075, 0), quaternions[0]))      # //C
+        waypoints.append(Pose(Point(0.567, 2.636, 0), quaternions[1]))      #//A 0.675,2.393   0.65
+        waypoints.append(Pose(Point(1.374, 3.045, 0), quaternions[2]))      # //B x 减小//1.35,2.899 B小一点1.40
+        waypoints.append(Pose(Point(-0.929, 0.853, 0), quaternions[3]))     # //4(-0.830, 0.969, 0)
+        waypoints.append(Pose(Point(-1.862, 1.298, 0), quaternions[4]))    # //3 （-1.650, 1.232, 0)
+        waypoints.append(Pose(Point(-0.934, 1.612, 0), quaternions[5]))    # //2
+        waypoints.append(Pose(Point(-1.784, 2.345, 0), quaternions[6]))    # //1
         waypoints.append(Pose(Point(0.002, -0.056, 0), quaternions[7]))    #起点
         waypoints.append(Pose(Point(-0.496, 3.921, 0), quaternions[8]))  #答题区(识别板2) 靠近里侧（-0.704,3.963,0） （0）靠近内侧 y减小(-0.784,3.750,0.1)
         waypoints.append(Pose(Point(0.866, -0.002, 0), quaternions[9]))  #识别板1向前一点0.6 ()x:0.65 y:0.025
@@ -95,7 +94,7 @@ class MoveBaseSquare():
                     rospy.loginfo("到达识别区。。。。。。。。")
                     self.count = 10
                     # self.clear_costmaps_service()
-                    rospy.sleep(6)     # 给6秒钟识别时间；若识别不稳定可改回10，若追求速度可继续降到4
+                    rospy.sleep(10)    #给10秒钟识别时间 10
                 else:
                     rospy.logwarn("识别区导航失败")
                     self.count = 9
@@ -352,7 +351,7 @@ class MoveBaseSquare():
             self.move_base.send_goal(goal)
             # Allow 1 minute to get there
             # 设定1分钟的时间限制
-            finished_within_time = self.move_base.wait_for_result(rospy.Duration(90))  # 单个导航目标最长等待90秒；地图较绕或倒车较多时比60秒更稳
+            finished_within_time = self.move_base.wait_for_result(rospy.Duration(60))
             # If we don't get there in time, abort the goal
             # 如果一分钟之内没有到达，放弃目标
             if not finished_within_time:
