@@ -6,13 +6,13 @@ import actionlib
 from actionlib_msgs.msg import *
 from geometry_msgs.msg import Pose, Point, Quaternion, Twist
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from nav_msgs.msg import Odometry  # 引入里程计消息
+from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler
 from visualization_msgs.msg import Marker
 from math import radians, pi
 from std_msgs.msg import Int32
 from std_msgs.msg import Int32MultiArray
-from std_msgs.msg import String     # 引入String类型，接收视觉节点的字符串结果
+from std_msgs.msg import String
 from std_srvs.srv import Empty
 import os
 import random
@@ -51,9 +51,9 @@ class MoveBaseSquare():
         self.windows_count = 3
         
         # 里程计相关变量初始化
-        self.current_v = 0.0  # 线速度
-        self.current_x = 0.0  # X坐标
-        self.current_y = 0.0  # Y坐标
+        self.current_v = 0.0  
+        self.current_x = 0.0  
+        self.current_y = 0.0  
 
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist,queue_size=10)
         self.cam_sub = rospy.Subscriber('/cam_return', Int32MultiArray, self.detect_result,queue_size=10)     
@@ -73,7 +73,7 @@ class MoveBaseSquare():
             self.tcp_client.connect((self.referee_ip, self.referee_port))
             rospy.loginfo("[网络] 成功连接到裁判系统！")
         except Exception as e:
-            rospy.logwarn("[网络] 裁判系统连接失败 (未开启或IP错误)，单机模式运行。错误: %s" % e)
+            rospy.logwarn("[网络] 裁判系统未连接: %s" % e)
             self.tcp_client = None
 
         self.move_base = actionlib.SimpleActionClient("move_base", MoveBaseAction)
@@ -92,9 +92,7 @@ class MoveBaseSquare():
                 goal.target_pose.pose = waypoints[9]     
                 if(self.move(goal) == True):
                     rospy.loginfo("到达识别区。。。。。。。。")
-                    
                     self.send_referee_status(task_id=1, info="到达识别板1")
-                    
                     self.count = 10
                     rospy.sleep(6)     
                 else:
@@ -180,12 +178,9 @@ class MoveBaseSquare():
                 goal.target_pose.pose = waypoints[8]     
                 if(self.move(goal) == True):
                     rospy.loginfo("到达识别板2。。。。。。。。")
-                    
                     self.send_referee_status(task_id=3, info="到达识别板2")
-                    
                     self.count = 12
                     self.clear_costmaps_service()   
-                    # [预留接口] 以后这里接入从识别板2识别出来的“等待状态”
                     rospy.loginfo("化验区空闲，默认不等待") 
                     rospy.sleep(1)     
 
@@ -197,9 +192,7 @@ class MoveBaseSquare():
                 goal.target_pose.pose = waypoints[(6 - self.windows_1234)]
                 if(self.move(goal) == True):
                     rospy.loginfo("到达数字区。。。。。。。。")   
-                    
                     self.send_referee_status(task_id=4, info="化验区送药完成")                 
-                    
                     self.count = 9 
                     self.clear_costmaps_service()   
                     rospy.sleep(1)     
@@ -233,5 +226,55 @@ class MoveBaseSquare():
 
     # === 视觉识别字符串回调，负责把结果发给裁判 ===
     def vision_callback(self, msg):
-        # 如果当前正处于识别区域（count=10是因为识别完成后马上进入10状态准备去取药）
-        # 这里用 count == 1
+        if self.count == 10: 
+            self.send_referee_status(task_id=1, info="视觉识别结果: %s" % str(msg.data))
+
+    # === 网络发送函数，带上速度和位置 ===
+    def send_referee_status(self, task_id, info=""):
+        if self.tcp_client is None:
+            return 
+        
+        try:
+            status_msg = "Task:%d|V:%.2f|X:%.2f|Y:%.2f\n" % (task_id, self.current_v, self.current_x, self.current_y)
+            self.tcp_client.sendall(status_msg.encode('utf-8'))
+            rospy.loginfo("[网络] 状态已发送 -> %s (速度:%.2f)" % (info, self.current_v))
+        except Exception as e:
+            rospy.logerr("[网络] 发送数据失败: %s" % e)
+
+    def move(self, goal):
+        self.move_base.send_goal(goal)
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(90))  
+        if not finished_within_time:
+            self.move_base.cancel_goal()
+            rospy.loginfo("Timed out achieving goal")
+        else:
+            state = self.move_base.get_state()
+            if state == GoalStatus.SUCCEEDED:
+                rospy.loginfo("Goal succeeded!")
+                return True
+        return False        
+
+    def detect_result(self, msg):
+        if self.count == 10:   
+            self.ram_result = msg.data
+            rospy.logwarn("self.ram_result: %s" % str(self.ram_result))
+            self.windows_C = self.ram_result[0] 
+            self.windows_A = self.ram_result[1]
+            self.windows_B = self.ram_result[2]
+            self.windows_count = self.ram_result[3] 
+            self.windows_1234 = self.ram_result[4] 
+
+    def shutdown(self):
+        rospy.loginfo("Stopping the robot...")
+        self.move_base.cancel_goal()
+        rospy.sleep(2)
+        self.cmd_vel_pub.publish(Twist())
+        if getattr(self, 'tcp_client', None):
+            self.tcp_client.close()
+        rospy.sleep(1)
+
+if __name__ == '__main__':
+    try:
+        MoveBaseSquare()
+    except rospy.ROSInterruptException:
+        rospy.loginfo("Navigation test finished.")
