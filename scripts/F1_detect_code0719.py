@@ -66,7 +66,7 @@ rospy.init_node('detect_abc', anonymous=True)
 pub_flag = rospy.Publisher('/cam_return', Int32MultiArray, queue_size=10)
 
 # 打开摄像头
-cap = cv2.VideoCapture("http://192.168.12.1:8080/stream?topic=/camera/rgb/image_raw")
+cap = cv2.VideoCapture("http://192.168.5.4:8080/stream?topic=/camera/rgb/image_raw")
 # cap = cv2.VideoCapture("http://192.168.31.66:8080/stream?topic=/usb_cam/image_raw")
 
 # imgA = cv2.imread('/home/EPRobot/robot_ws/src/pharmacy_pkg/scripts/A.jpg')
